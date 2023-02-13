@@ -1,0 +1,22 @@
+[package]
+name = "amax-redirect"
+version = "0.1.0"
+edition = "2021"
+authors = ["Aib0t <github.com/Aib0t>", "tobii <github.com/tobii-dev>"]
+
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+parse_int = "0.6.0"
+
+[dependencies.windows]
+version = "0.44.0"
+features = [
+	"Win32_Foundation",
+	"Win32_System_SystemServices",
+	"Win32_System_LibraryLoader",
+	"Win32_System_Memory",
+	#"Win32_System_Console",
+]
