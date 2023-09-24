@@ -43,7 +43,10 @@ pub fn init() {
 		.join("amax")
 		.join("config")
 		.join("amax-redirect.cfg");
-	let redirects = read_redirects(&path_config).unwrap();
+	let redirects = read_redirects(&path_config).unwrap_or_else(|err| {
+		let path_config = path_config.display();
+		panic!("Could't read redirects config from [{path_config}]. Does the file exist? Error: {err:?}");
+	});
 	set_redirects(ptr_module_base, redirects);
 }
 

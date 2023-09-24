@@ -11,14 +11,12 @@ struct MyRedirectsPlugin {}
 
 impl BlurPlugin for MyRedirectsPlugin {
 	fn name(&self) -> &'static str {
-		"MyRedirectsPlugin"
+		"AmaxRedirectorPlugin"
 	}
 
 	fn on_event(&self, _event: &BlurEvent) {}
 
-	fn free(&self) {
-		// TODO: Consider removing the redirects?
-	}
+	fn free(&self) {}
 }
 
 #[no_mangle]
@@ -33,7 +31,6 @@ fn plugin_init(_api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
 	let log_file = std::fs::File::create(&log_path).unwrap_or_else(|_| {
 		panic!("Couldn't create log file: {log_path}");
 	});
-
 	CombinedLogger::init(vec![
 		TermLogger::new(
 			LevelFilter::Trace,
@@ -44,6 +41,7 @@ fn plugin_init(_api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
 		WriteLogger::new(LevelFilter::Trace, Config::default(), log_file),
 	])
 	.unwrap();
+	log_panics::init();
 
 	redirects::init();
 
