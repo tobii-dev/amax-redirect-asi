@@ -1,6 +1,6 @@
 [package]
 name = "amax-redirect"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 authors = ["Aib0t <github.com/Aib0t>", "tobii <github.com/tobii-dev>"]
 
@@ -9,5 +9,11 @@ authors = ["Aib0t <github.com/Aib0t>", "tobii <github.com/tobii-dev>"]
 crate-type = ["cdylib"]
 
 [dependencies]
+blur-plugins-core = { git = "https://github.com/tobii-dev/blur-plugins-core" }
+
 parse_int = "0.6.0"
 windows = { version = "0.51.1", features = ["Win32_Foundation", "Win32_System_Memory", "Win32_System_LibraryLoader", "Win32_System_SystemServices"] }
+
+log = { version = "0.4.20", features = ["release_max_level_info"] }
+log-panics = { version = "2.1.0", features = ["with-backtrace"] }
+simplelog = "0.12.1"
