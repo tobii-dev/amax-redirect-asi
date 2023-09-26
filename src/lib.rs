@@ -27,10 +27,7 @@ fn plugin_init(_api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
 		.set_time_offset_to_local()
 		.unwrap()
 		.build();
-	let log_path = std::format!(".\\amax\\log\\{}.log", plugin.name());
-	let log_file = std::fs::File::create(&log_path).unwrap_or_else(|_| {
-		panic!("Couldn't create log file: {log_path}");
-	});
+	let log_file = blur_plugins_core::create_log_file("amax_redirect.log").unwrap();
 	CombinedLogger::init(vec![
 		TermLogger::new(
 			LevelFilter::Trace,
