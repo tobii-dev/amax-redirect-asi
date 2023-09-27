@@ -1,6 +1,6 @@
 [package]
 name = "amax-redirect"
-version = "0.1.1"
+version = "0.1.2"
 edition = "2021"
 authors = ["Aib0t <github.com/Aib0t>", "tobii <github.com/tobii-dev>"]
 
