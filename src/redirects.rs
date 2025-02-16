@@ -5,9 +5,7 @@ use std::{
 	path::Path,
 };
 use windows::{
-	core::PCSTR,
 	Win32::System::{
-		LibraryLoader::GetModuleHandleA,
 		Memory::{VirtualProtect, PAGE_EXECUTE_READWRITE, PAGE_PROTECTION_FLAGS},
 	},
 };
@@ -34,20 +32,17 @@ impl Debug for Redirect {
 	}
 }
 
-pub fn init() {
-	let exe_handle = unsafe { GetModuleHandleA(PCSTR::null()) };
-	let exe_handle = exe_handle.unwrap();
-	let ptr_module_base = exe_handle.0 as *mut c_void;
-
+pub fn init(ptr_base: *mut c_void) {
 	let path_config = std::path::Path::new(".")
 		.join("amax")
 		.join("config")
 		.join("amax-redirect.cfg");
 	let redirects = read_redirects(&path_config).unwrap_or_else(|err| {
 		let path_config = path_config.display();
-		panic!("Could't read redirects config from [{path_config}]. Does the file exist? Error: {err:?}");
+		log::error!("Problem reading [{path_config}]. Does the file exist? Error: {err:?}");
+		panic!("Could't read redirects config from [{path_config}].");
 	});
-	set_redirects(ptr_module_base, redirects);
+	set_redirects(ptr_base, redirects);
 }
 
 fn read_redirects(path: &Path) -> Result<Vec<Redirect>, Error> {
@@ -73,11 +68,11 @@ fn read_redirects(path: &Path) -> Result<Vec<Redirect>, Error> {
 	Ok(r)
 }
 
-fn set_redirects(ptr_module_base: *mut c_void, redirects: Vec<Redirect>) {
+fn set_redirects(ptr_base: *mut c_void, redirects: Vec<Redirect>) {
 	for redirect in redirects {
 		log::debug!("[REDIRECTS] {redirect:#?}");
 		// The pointer to the original string inside Blur.exe:
-		let ptr = ptr_module_base.wrapping_offset(redirect.offset) as *mut c_uchar;
+		let ptr = ptr_base.wrapping_offset(redirect.offset) as *mut c_uchar;
 
 		// Size of the overwrite
 		let size = max(redirect.org.len(), redirect.dst.len());

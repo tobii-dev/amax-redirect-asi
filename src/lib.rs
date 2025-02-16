@@ -16,13 +16,20 @@ impl BlurPlugin for MyRedirectsPlugin {
 
 	fn on_event(&self, _event: &BlurEvent) {}
 
-	fn free(&self) {}
+	fn free(&self) {
+		//TODO: Consider restoring the redirects
+	}
 }
 
 #[no_mangle]
-fn plugin_init(_api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
+fn plugin_init(api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
+	init_logs();
 	let plugin = MyRedirectsPlugin {};
+	redirects::init(api.get_exe_base_ptr());
+	Box::new(plugin)
+}
 
+fn init_logs() {
 	let cfg = ConfigBuilder::new()
 		.set_time_offset_to_local()
 		.unwrap()
@@ -39,8 +46,4 @@ fn plugin_init(_api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
 	])
 	.unwrap();
 	log_panics::init();
-
-	redirects::init();
-
-	Box::new(plugin)
 }
