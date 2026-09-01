@@ -6,7 +6,6 @@ use simplelog::{
 	ColorChoice, CombinedLogger, Config, ConfigBuilder, TermLogger, TerminalMode, WriteLogger,
 };
 
-#[repr(C)]
 struct MyRedirectsPlugin {}
 
 impl BlurPlugin for MyRedirectsPlugin {
@@ -21,7 +20,7 @@ impl BlurPlugin for MyRedirectsPlugin {
 	}
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 fn plugin_init(api: &mut dyn BlurAPI) -> Box<dyn BlurPlugin> {
 	init_logs();
 	let plugin = MyRedirectsPlugin {};
