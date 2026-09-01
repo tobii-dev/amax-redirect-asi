@@ -13,7 +13,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v7
 
     - name: Versions
       shell: bash
@@ -63,11 +62,14 @@ jobs:
     needs: [build-windows]
 
     steps:
+    - uses: actions/checkout@v7
+
     - name: Download Windows artifacts [Debug]
       uses: actions/download-artifact@v8
       with:
         name: windows-build-debug
         path: ./release-assets/windows-debug
+
     - name: Download Windows artifacts [Release]
       uses: actions/download-artifact@v8
       with:
