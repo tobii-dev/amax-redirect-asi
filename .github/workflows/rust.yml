@@ -1,4 +1,4 @@
-name: Build amax-redirects.asi
+name: Build
 
 on:
   push:
@@ -31,72 +31,44 @@ jobs:
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-    # - name: Install nightly
-    #   run: |
-    #     rustup toolchain install nightly-x86_64-pc-windows-msvc
-    #     rustup default nightly
-    #     rustup target add i686-pc-windows-msvc
-
     - name: Build [Debug]
       run: cargo build --verbose
+
     - name: Build [Release]
       run: cargo build --release --verbose
 
-    - name: Upload artifact [Debug]
+    - name: Create zips
+      shell: bash
+      run: |
+        python3 - <<'!EOF'
+        from zipfile import ZipFile, ZIP_DEFLATED
+
+        with ZipFile("amax-redirect-release.zip", "w", compression=ZIP_DEFLATED) as zf:
+            zf.write("./target/i686-pc-windows-msvc/release/amax_redirect.dll", "amax/dlls/amax_redirect.asi")
+            zf.write("./amax/config/amax-redirect.cfg", "amax/config/amax-redirect.cfg")
+
+        with ZipFile("amax-redirect-debug.zip", "w", compression=ZIP_DEFLATED) as zf:
+            zf.write("./target/i686-pc-windows-msvc/debug/amax_redirect.dll", "amax/dlls/amax_redirect.asi")
+            zf.write("./target/i686-pc-windows-msvc/debug/amax_redirect.pdb", "amax/dlls/amax_redirect.pdb")
+            zf.write("./amax/config/amax-redirect.cfg", "amax/config/amax-redirect.cfg")
+        !EOF
+
+    - name: Upload artifact
       uses: actions/upload-artifact@v7
       with:
-        name: windows-build-debug
+        name: windows-build
         path: |
-          ./target/i686-pc-windows-msvc/debug/amax_redirect.dll
-          ./target/i686-pc-windows-msvc/debug/amax_redirect.pdb
+          ./amax-redirect-debug.zip
+          ./amax-redirect-release.zip
 
-    - name: Upload artifact [Release]
-      uses: actions/upload-artifact@v7
-      with:
-        name: windows-build-release
-        path: |
-          ./target/i686-pc-windows-msvc/release/amax_redirect.dll
-
-  create-release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs: [build-windows]
-
-    steps:
-    - uses: actions/checkout@v7
-
-    - name: Download Windows artifacts [Debug]
-      uses: actions/download-artifact@v8
-      with:
-        name: windows-build-debug
-        path: ./release-assets/windows-debug
-
-    - name: Download Windows artifacts [Release]
-      uses: actions/download-artifact@v8
-      with:
-        name: windows-build-debug
-        path: ./release-assets/windows-release
-
-
-    # TODO: amax_redirect.zip/{debug,release}/amax-redirects.{asi,pdb}
-
-    - name: Publish [Debug] binaries to GitHub releases
+    - name: Publish to GitHub releases
       env:
         GH_TOKEN: ${{ github.token }}
+      shell: bash
       run: |
-        gh release create "${EPOCHREALTIME}-build-${GITHUB_SHA}-Debug" \
-          ./release-assets/windows-debug/amax_redirect.dll \
-          ./release-assets/windows-debug/amax_redirect.pdb \
-          --title "$TAG" \
-          --notes "Automated build artifacts" \
-          --prerelease
-
-    - name: Publish [Release] binaries to GitHub releases
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        gh release create "${EPOCHREALTIME}-build-${GITHUB_SHA}-Release" \
-          ./release-assets/windows-release/amax_redirect.dll \
+        gh release create "${EPOCHREALTIME}-build-${GITHUB_SHA}" \
+          ./amax-redirect-debug.zip \
+          ./amax-redirect-release.zip \
           --title "$TAG" \
           --notes "Automated build artifacts" \
           --prerelease
